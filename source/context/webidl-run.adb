@@ -27,6 +27,7 @@ begin
       end;
    end loop;
 
+   Handler.Initialize;
    Source.Set_String_Vector (Vector);
    Scanner.Set_Source (Source'Unchecked_Access);
    Scanner.Set_Handler (Handler'Unchecked_Access);

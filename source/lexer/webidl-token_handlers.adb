@@ -3,8 +3,6 @@
 --  SPDX-License-Identifier: MIT
 -------------------------------------------------------------
 
-with Ada.Wide_Wide_Text_IO;
-
 with League.Strings;
 
 package body WebIDL.Token_Handlers is
@@ -23,7 +21,6 @@ package body WebIDL.Token_Handlers is
    begin
       Token := WebIDL.Tokens.Integer_Token;
       Skip := False;
-      Ada.Wide_Wide_Text_IO.Put_Line ("integer");
    end Integer;
 
    overriding procedure Decimal
@@ -37,7 +34,6 @@ package body WebIDL.Token_Handlers is
    begin
       Token := WebIDL.Tokens.Decimal_Token;
       Skip := False;
-      Ada.Wide_Wide_Text_IO.Put_Line ("decimal");
    end Decimal;
 
    overriding procedure Delimiter
@@ -84,7 +80,6 @@ package body WebIDL.Token_Handlers is
             raise Program_Error;
       end case;
 
-      Ada.Wide_Wide_Text_IO.Put_Line (Text.To_Wide_Wide_String);
       Skip := False;
    end Delimiter;
 
@@ -99,7 +94,6 @@ package body WebIDL.Token_Handlers is
    begin
       Token := WebIDL.Tokens.Ellipsis_Token;
       Skip := False;
-      Ada.Wide_Wide_Text_IO.Put_Line ("...");
    end Ellipsis;
 
    overriding procedure Identifier
@@ -110,11 +104,97 @@ package body WebIDL.Token_Handlers is
       Skip    : in out Boolean)
    is
       pragma Unreferenced (Skip);
+
+      Text  : constant League.Strings.Universal_String := Scanner.Get_Text;
+      Found : constant Keyword_Maps.Cursor := Self.Map.Find (Text);
    begin
-      Token := WebIDL.Tokens.Identifier_Token;
+      if Keyword_Maps.Has_Element (Found) then
+         Token := Keyword_Maps.Element (Found);
+      else
+         Token := WebIDL.Tokens.Identifier_Token;
+      end if;
+
       Skip := False;
-      Ada.Wide_Wide_Text_IO.Put_Line ("identifier");
    end Identifier;
+
+   procedure Initialize (Self : in out Handler'Class) is
+      use all type WebIDL.Tokens.Token_Kind;
+
+      function "+" (Text : Wide_Wide_String)
+        return League.Strings.Universal_String
+          renames League.Strings.To_Universal_String;
+
+      Map : Keyword_Maps.Map renames Self.Map;
+   begin
+      Map.Insert (+"any", Any_Token);
+      Map.Insert (+"async", Async_Token);
+      Map.Insert (+"attribute", Attribute_Token);
+      Map.Insert (+"bigint", Bigint_Token);
+      Map.Insert (+"boolean", Boolean_Token);
+      Map.Insert (+"byte", Byte_Token);
+      Map.Insert (+"callback", Callback_Token);
+      Map.Insert (+"const", Const_Token);
+      Map.Insert (+"constructor", Constructor_Token);
+      Map.Insert (+"deleter", Deleter_Token);
+      Map.Insert (+"dictionary", Dictionary_Token);
+      Map.Insert (+"double", Double_Token);
+      Map.Insert (+"enum", Enum_Token);
+      Map.Insert (+"false", False_Token);
+      Map.Insert (+"float", Float_Token);
+      Map.Insert (+"getter", Getter_Token);
+      Map.Insert (+"includes", Includes_Token);
+      Map.Insert (+"inherit", Inherit_Token);
+      Map.Insert (+"interface", Interface_Token);
+      Map.Insert (+"iterable", Iterable_Token);
+      Map.Insert (+"long", Long_Token);
+      Map.Insert (+"maplike", Maplike_Token);
+      Map.Insert (+"mixin", Mixin_Token);
+      Map.Insert (+"namespace", Namespace_Token);
+      Map.Insert (+"null", Null_Token);
+      Map.Insert (+"object", Object_Token);
+      Map.Insert (+"octet", Octet_Token);
+      Map.Insert (+"optional", Optional_Token);
+      Map.Insert (+"or", Or_Token);
+      Map.Insert (+"other", Other_Token);
+      Map.Insert (+"partial", Partial_Token);
+      Map.Insert (+"readonly", Readonly_Token);
+      Map.Insert (+"record", Record_Token);
+      Map.Insert (+"required", Required_Token);
+      Map.Insert (+"sequence", Sequence_Token);
+      Map.Insert (+"setlike", Setlike_Token);
+      Map.Insert (+"setter", Setter_Token);
+      Map.Insert (+"short", Short_Token);
+      Map.Insert (+"static", Static_Token);
+      Map.Insert (+"stringifier", Stringifier_Token);
+      Map.Insert (+"symbol", Symbol_Token);
+      Map.Insert (+"true", True_Token);
+      Map.Insert (+"typedef", Typedef_Token);
+      Map.Insert (+"undefined", Undefined_Token);
+      Map.Insert (+"unrestricted", Unrestricted_Token);
+      Map.Insert (+"unsigned", Unsigned_Token);
+
+      Map.Insert (+"ArrayBuffer", ArrayBuffer_Token);
+      Map.Insert (+"ByteString", ByteString_Token);
+      Map.Insert (+"DataView", DataView_Token);
+      Map.Insert (+"DOMString", DOMString_Token);
+      Map.Insert (+"Float32Array", Float32Array_Token);
+      Map.Insert (+"Float64Array", Float64Array_Token);
+      Map.Insert (+"FrozenArray", FrozenArray_Token);
+      Map.Insert (+"Infinity", Infinity_Token);
+      Map.Insert (+"Int16Array", Int16Array_Token);
+      Map.Insert (+"Int32Array", Int32Array_Token);
+      Map.Insert (+"Int8Array", Int8Array_Token);
+      Map.Insert (+"NaN", NaN_Token);
+      Map.Insert (+"ObservableArray", ObservableArray_Token);
+      Map.Insert (+"Promise", Promise_Token);
+      Map.Insert (+"Uint16Array", Uint16Array_Token);
+      Map.Insert (+"Uint32Array", Uint32Array_Token);
+      Map.Insert (+"Uint8Array", Uint8Array_Token);
+      Map.Insert (+"Uint8ClampedArray", Uint8ClampedArray_Token);
+      Map.Insert (+"USVString", USVString_Token);
+
+      null;
+   end Initialize;
 
    overriding procedure String
      (Self    : not null access Handler;
@@ -127,7 +207,6 @@ package body WebIDL.Token_Handlers is
    begin
       Token := WebIDL.Tokens.String_Token;
       Skip := False;
-      Ada.Wide_Wide_Text_IO.Put_Line ("string");
    end String;
 
    overriding procedure Whitespace

@@ -5,6 +5,8 @@
 
 with Ada.Wide_Wide_Text_IO;
 
+with League.Strings;
+
 package body WebIDL.Token_Handlers is
 
    -------------
@@ -37,6 +39,68 @@ package body WebIDL.Token_Handlers is
       Skip := False;
       Ada.Wide_Wide_Text_IO.Put_Line ("decimal");
    end Decimal;
+
+   overriding procedure Delimiter
+     (Self    : not null access Handler;
+      Scanner : not null access WebIDL.Scanners.Scanner'Class;
+      Rule    : WebIDL.Scanner_Types.Rule_Index;
+      Token   : out WebIDL.Tokens.Token_Kind;
+      Skip    : in out Boolean)
+   is
+      Text : constant League.Strings.Universal_String := Scanner.Get_Text;
+   begin
+      case Text (1).To_Wide_Wide_Character is
+         when '(' =>
+            Token := '(';
+         when ')' =>
+            Token := ')';
+         when ',' =>
+            Token := ',';
+         when '-' =>
+            Token := '-';
+         when '.' =>
+            Token := '.';
+         when ':' =>
+            Token := ':';
+         when ';' =>
+            Token := ';';
+         when '<' =>
+            Token := '<';
+         when '=' =>
+            Token := '=';
+         when '>' =>
+            Token := '>';
+         when '?' =>
+            Token := '?';
+         when '[' =>
+            Token := '[';
+         when ']' =>
+            Token := ']';
+         when '{' =>
+            Token := '{';
+         when '}' =>
+            Token := '}';
+         when others =>
+            raise Program_Error;
+      end case;
+
+      Ada.Wide_Wide_Text_IO.Put_Line (Text.To_Wide_Wide_String);
+      Skip := False;
+   end Delimiter;
+
+   overriding procedure Ellipsis
+     (Self    : not null access Handler;
+      Scanner : not null access WebIDL.Scanners.Scanner'Class;
+      Rule    : WebIDL.Scanner_Types.Rule_Index;
+      Token   : out WebIDL.Tokens.Token_Kind;
+      Skip    : in out Boolean)
+   is
+      pragma Unreferenced (Skip);
+   begin
+      Token := WebIDL.Tokens.Ellipsis_Token;
+      Skip := False;
+      Ada.Wide_Wide_Text_IO.Put_Line ("...");
+   end Ellipsis;
 
    overriding procedure Identifier
      (Self    : not null access Handler;

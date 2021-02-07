@@ -7,7 +7,14 @@ package WebIDL.Tokens is
    pragma Preelaborate;
 
    type Token_Kind is
-     (Integer_Token,
+     ('(', ')',
+      ',', '-', '.', ':', ';',
+      '<', '=', '>',
+      '?',
+      '[', ']',
+      '{', '}',
+      Ellipsis_Token,
+      Integer_Token,
       Decimal_Token,
       Identifier_Token,
       String_Token,

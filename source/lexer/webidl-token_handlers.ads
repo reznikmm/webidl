@@ -12,6 +12,20 @@ package WebIDL.Token_Handlers is
 
    type Handler is new WebIDL.Scanner_Handlers.Handler with null record;
 
+   overriding procedure Delimiter
+     (Self    : not null access Handler;
+      Scanner : not null access WebIDL.Scanners.Scanner'Class;
+      Rule    : WebIDL.Scanner_Types.Rule_Index;
+      Token   : out WebIDL.Tokens.Token_Kind;
+      Skip    : in out Boolean);
+
+   overriding procedure Ellipsis
+     (Self    : not null access Handler;
+      Scanner : not null access WebIDL.Scanners.Scanner'Class;
+      Rule    : WebIDL.Scanner_Types.Rule_Index;
+      Token   : out WebIDL.Tokens.Token_Kind;
+      Skip    : in out Boolean);
+
    overriding procedure Integer
      (Self    : not null access Handler;
       Scanner : not null access WebIDL.Scanners.Scanner'Class;

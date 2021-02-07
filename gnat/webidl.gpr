@@ -10,7 +10,8 @@ project WebIDL is
    for Source_Dirs use
      ("../source/context",
       "../source/lexer",
-      "../source/lexer/generated");
+      "../source/lexer/generated",
+      "../source/parser");
    for Object_Dir use "../.objs";
    for Main use ("webidl-run.adb");
 

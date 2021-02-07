@@ -12,6 +12,7 @@ with WebIDL.Scanner_Types;
 with WebIDL.Tokens;
 
 package WebIDL.Token_Handlers is
+   pragma Preelaborate;
 
    type Handler is limited new WebIDL.Scanner_Handlers.Handler with private;
 

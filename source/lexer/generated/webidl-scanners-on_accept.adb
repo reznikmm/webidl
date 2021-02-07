@@ -10,6 +10,30 @@ begin
       when 1 =>
          Self.Integer (Scanner, Rule, Token, Skip);
 
+      when 2 =>
+         Self.Decimal (Scanner, Rule, Token, Skip);
+
+      when 3 =>
+         Self.Identifier (Scanner, Rule, Token, Skip);
+
+      when 4 =>
+         Self.String (Scanner, Rule, Token, Skip);
+
+      when 5 =>
+         Self.Whitespace (Scanner, Rule, Token, Skip);
+
+      when 6 =>
+         Self.Line_Comment (Scanner, Rule, Token, Skip);
+
+      when 7 =>
+         Self.Comment_Start (Scanner, Rule, Token, Skip);
+
+      when 8 =>
+         Self.Comment_End (Scanner, Rule, Token, Skip);
+
+      when 9 =>
+         Self.Comment_Text (Scanner, Rule, Token, Skip);
+
       when others =>
          raise Constraint_Error;
    end case;

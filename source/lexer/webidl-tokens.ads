@@ -3,6 +3,8 @@
 --  SPDX-License-Identifier: MIT
 -------------------------------------------------------------
 
+with League.Strings;
+
 package WebIDL.Tokens is
    pragma Preelaborate;
 
@@ -91,6 +93,8 @@ package WebIDL.Tokens is
       End_Of_Stream_Token,
       Error_Token);
 
-   type Token (Kind : Token_Kind := End_Of_Stream_Token) is null record;
+   type Token (Kind : Token_Kind := End_Of_Stream_Token) is record
+      Text : League.Strings.Universal_String;
+   end record;
 
 end WebIDL.Tokens;

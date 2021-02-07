@@ -82,6 +82,8 @@ package body WebIDL.Scanners is
    ---------------
 
    procedure Get_Token (Self : access Scanner'Class; Result : out Token) is
+      use all type WebIDL.Tokens.Token_Kind;
+
       procedure Next;
 
       procedure Next is
@@ -106,7 +108,9 @@ package body WebIDL.Scanners is
    begin
       loop
          if Self.Buffer (Self.Next) = EOF then
-            Result := (Kind => WebIDL.Tokens.End_Of_Stream_Token);
+            Result :=
+              (WebIDL.Tokens.End_Of_Stream_Token,
+               League.Strings.Empty_Universal_String);
             return;
          end if;
 
@@ -146,13 +150,16 @@ package body WebIDL.Scanners is
          Next;
 
          if Self.Rule = 0 then
-            Result := (Kind => WebIDL.Tokens.Error_Token);
+            Result :=
+              (WebIDL.Tokens.Error_Token,
+               League.Strings.Empty_Universal_String);
             return;
          else
             On_Accept (Self.Handler, Self, Self.Rule, Token, Skip);
 
             if not Skip then
-               Result := (Kind => Token);
+               Result := (Token, Self.Get_Text);
+
                return;
             end if;
          end if;

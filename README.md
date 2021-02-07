@@ -1,7 +1,7 @@
 WebIDL
 ======
 
-[![CircleCI](https://circleci.com/gh/reznikmm/webidl.svg?style=svg)](https://circleci.com/gh/reznikmm/webidl)
+[![Build](https://github.com/reznikmm/webidl/workflows/Build/badge.svg)](https://github.com/reznikmm/webidl/actions)
 [![REUSE status](https://api.reuse.software/badge/github.com/reznikmm/webidl)](https://api.reuse.software/info/github.com/reznikmm/webidl)
 
 > A WebIDL parser in Ada

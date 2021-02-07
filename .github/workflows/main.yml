@@ -16,3 +16,6 @@ jobs:
         uses: fsfe/reuse-action@v1.1
         with:
           args: --root webidl lint
+      - uses: reznikmm/fedora-ada-action@v3
+        with:
+          spec: webidl/packages/webidl.spec

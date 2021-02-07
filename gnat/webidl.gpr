@@ -3,10 +3,14 @@
 --  SPDX-License-Identifier: MIT
 -------------------------------------------------------------
 
+with "matreshka_league";
+
 project WebIDL is
 
    for Source_Dirs use
-     ("../source/context");
+     ("../source/context",
+      "../source/lexer",
+      "../source/lexer/generated");
    for Object_Dir use "../.objs";
    for Main use ("webidl-run.adb");
 

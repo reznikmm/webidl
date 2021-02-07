@@ -29,3 +29,8 @@ clean:
 check: all
 	@set -e; \
 	echo No tests yet
+
+gen_lexer:
+	cd source/lexer/generated ;\
+	uaflex --types WebIDL.Scanner_Types --handler WebIDL.Scanner_Handlers\
+	  --scanner WebIDL.Scanners --tokens WebIDL.Tokens ../webidl.l

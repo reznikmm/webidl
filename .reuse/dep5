@@ -3,6 +3,6 @@ Upstream-Name: webidl
 Upstream-Contact: Max Reznik <reznikmm@gmail.com>
 Source: https://github.com/reznikmm/webidl
 
-Files: README.md
+Files: README.md source/lexer/generated/*
 Copyright: 2021 Max Reznik <reznikmm@gmail.com>
 License: MIT

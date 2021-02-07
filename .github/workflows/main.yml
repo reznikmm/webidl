@@ -7,7 +7,7 @@ name: Build
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Check REUSE compliance
+    name: Build and check
     steps:
       - uses: actions/checkout@v2
         with:
@@ -16,6 +16,7 @@ jobs:
         uses: fsfe/reuse-action@v1.1
         with:
           args: --root webidl lint
-      - uses: reznikmm/fedora-ada-action@v3
+      - name: Build RPM
+        uses: reznikmm/fedora-ada-action@v3
         with:
           spec: webidl/packages/webidl.spec

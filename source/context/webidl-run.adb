@@ -11,11 +11,13 @@ with League.Strings;
 with WebIDL.Scanners;
 with WebIDL.String_Sources;
 with WebIDL.Tokens;
+with WebIDL.Token_Handlers;
 
 procedure WebIDL.Run is
    Vector  : League.String_Vectors.Universal_String_Vector;
    Source  : aliased WebIDL.String_Sources.String_Source;
    Scanner : aliased WebIDL.Scanners.Scanner;
+   Handler : aliased WebIDL.Token_Handlers.Handler;
 begin
    while not Ada.Wide_Wide_Text_IO.End_Of_File loop
       declare
@@ -27,6 +29,7 @@ begin
 
    Source.Set_String_Vector (Vector);
    Scanner.Set_Source (Source'Unchecked_Access);
+   Scanner.Set_Handler (Handler'Unchecked_Access);
 
    loop
       declare
@@ -35,7 +38,7 @@ begin
       begin
          Scanner.Get_Token (Token);
 
-         exit when Token.Kind = End_Of_Stream_Token;
+         exit when Token.Kind in End_Of_Stream_Token | Error_Token;
       end;
    end loop;
 end WebIDL.Run;

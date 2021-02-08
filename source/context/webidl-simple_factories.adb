@@ -7,8 +7,29 @@ package body WebIDL.Simple_Factories is
 
    package body Nodes is
 
+      type Argument_Vector_C_Access is access constant Argument_Vector;
+
+      overriding function Arguments (Self : Constructor)
+        return not null WebIDL.Arguments.Argument_Iterator_Access
+      is
+         X : constant Argument_Vector_C_Access :=
+           Self.Arguments'Unchecked_Access;
+      begin
+         return WebIDL.Arguments.Argument_Iterator_Access (X);
+      end Arguments;
+
       overriding function First (Self : Member_Vector)
         return WebIDL.Interface_Members.Cursor is
+      begin
+         if Self.Vector.Is_Empty then
+            return (1, null);
+         else
+            return (1, Self.Vector.First_Element);
+         end if;
+      end First;
+
+      overriding function First (Self : Argument_Vector)
+        return WebIDL.Arguments.Cursor is
       begin
          if Self.Vector.Is_Empty then
             return (1, null);
@@ -29,9 +50,28 @@ package body WebIDL.Simple_Factories is
          end if;
       end Next;
 
+      overriding function Next
+        (Self     : Argument_Vector;
+         Position : WebIDL.Arguments.Cursor)
+           return WebIDL.Arguments.Cursor is
+      begin
+         if Position.Index >= Self.Vector.Last_Index then
+            return (Self.Vector.Last_Index + 1, null);
+         else
+            return (Position.Index + 1, Self.Vector (Position.Index + 1));
+         end if;
+      end Next;
+
       overriding procedure Append
         (Self : in out Member_Vector;
          Item : not null WebIDL.Interface_Members.Interface_Member_Access) is
+      begin
+         Self.Vector.Append (Item);
+      end Append;
+
+      overriding procedure Append
+        (Self : in out Argument_Vector;
+         Item : not null WebIDL.Arguments.Argument_Access) is
       begin
          Self.Vector.Append (Item);
       end Append;
@@ -47,6 +87,65 @@ package body WebIDL.Simple_Factories is
       end Members;
 
    end Nodes;
+
+   ---------
+   -- Any --
+   ---------
+
+   overriding function Any (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.Any'Access;
+   end Any;
+
+   --------------
+   -- Argument --
+   --------------
+
+   overriding function Argument
+     (Self         : in out Factory;
+      Type_Def     : WebIDL.Types.Type_Access;
+      Name         : League.Strings.Universal_String;
+      Is_Optional  : Boolean;
+      Has_Ellipsis : Boolean)
+        return not null WebIDL.Arguments.Argument_Access
+   is
+      Result : constant Nodes.Argument_Access := new Nodes.Argument'
+        (Name, Type_Def, Is_Optional, Has_Ellipsis);
+   begin
+
+      return WebIDL.Arguments.Argument_Access (Result);
+   end Argument;
+
+   ---------------
+   -- Arguments --
+   ---------------
+
+   overriding function Arguments (Self : in out Factory)
+     return not null WebIDL.Factories.Argument_Vector_Access
+   is
+      Result : constant Nodes.Argument_Vector_Access :=
+        new Nodes.Argument_Vector;
+   begin
+      return WebIDL.Factories.Argument_Vector_Access (Result);
+   end Arguments;
+
+   -----------------
+   -- Constructor --
+   -----------------
+
+   overriding function Constructor
+     (Self : in out Factory;
+      Args : not null WebIDL.Factories.Argument_Vector_Access)
+        return not null WebIDL.Constructors.Constructor_Access
+   is
+      Result : constant Nodes.Constructor_Access := new Nodes.Constructor'
+        (Arguments => <>);
+   begin
+      Result.Arguments.Vector := Nodes.Argument_Vector (Args.all).Vector;
+
+      return WebIDL.Constructors.Constructor_Access (Result);
+   end Constructor;
 
    -----------------
    -- Enumeration --
@@ -93,5 +192,25 @@ package body WebIDL.Simple_Factories is
 
       return WebIDL.Interfaces.Interface_Access (Result);
    end New_Interface;
+
+   ------------
+   -- Object --
+   ------------
+
+   overriding function Object (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.Object'Access;
+   end Object;
+
+   ------------
+   -- Symbol --
+   ------------
+
+   overriding function Symbol (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.Symbol'Access;
+   end Symbol;
 
 end WebIDL.Simple_Factories;

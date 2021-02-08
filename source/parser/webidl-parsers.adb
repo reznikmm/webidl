@@ -5,10 +5,13 @@
 
 with League.Strings;
 
+with WebIDL.Arguments;
+with WebIDL.Constructors;
 with WebIDL.Definitions;
 with WebIDL.Enumerations;
 with WebIDL.Interface_Members;
 with WebIDL.Interfaces;
+with WebIDL.Types;
 
 package body WebIDL.Parsers is
 
@@ -36,10 +39,21 @@ package body WebIDL.Parsers is
          Ok   : in out Boolean)
         with Inline;
 
+      procedure Argument
+        (Result : out WebIDL.Arguments.Argument_Access;
+         Ok     : in out Boolean);
+      procedure ArgumentList
+        (Result : out WebIDL.Factories.Argument_Vector_Access;
+         Ok     : in out Boolean);
+      procedure ArgumentName
+        (Result : out League.Strings.Universal_String;
+         Ok     : in out Boolean);
       procedure CallbackOrInterfaceOrMixin
         (Result : out WebIDL.Definitions.Definition_Access;
          Ok     : in out Boolean);
-
+      procedure Constructor
+        (Result : out WebIDL.Constructors.Constructor_Access;
+         Ok     : in out Boolean);
       procedure Definition
         (Result : out WebIDL.Definitions.Definition_Access;
          Ok     : in out Boolean);
@@ -65,6 +79,113 @@ package body WebIDL.Parsers is
       procedure InterfaceRest
         (Result : out WebIDL.Interfaces.Interface_Access;
          Ok     : in out Boolean);
+      procedure DistinguishableType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
+      procedure SingleType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
+      procedure ParseType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
+
+      --------------
+      -- Argument --
+      --------------
+
+      procedure Argument
+        (Result : out WebIDL.Arguments.Argument_Access;
+         Ok     : in out Boolean)
+      is
+         Name : League.Strings.Universal_String;
+         Type_Def : WebIDL.Types.Type_Access;
+         Opt : Boolean := False;
+         Ellipsis : Boolean := False;
+      begin
+         if not Ok then
+            return;
+         elsif Next.Kind = Optional_Token then
+            Opt := True;
+            raise Program_Error;
+         else
+            ParseType (Type_Def, Ok);
+
+            if Next.Kind = Ellipsis_Token then
+               Expect (Ellipsis_Token, Ok);
+               Ellipsis := True;
+            end if;
+
+            ArgumentName (Name, Ok);
+         end if;
+
+         Result := Factory.Argument
+           (Type_Def     => Type_Def,
+            Name         => Name,
+            Is_Options   => Opt,
+            Has_Ellipsis => Ellipsis);
+      end Argument;
+
+      ------------------
+      -- ArgumentList --
+      ------------------
+
+      procedure ArgumentList
+        (Result : out WebIDL.Factories.Argument_Vector_Access;
+         Ok     : in out Boolean) is
+      begin
+         Result := Factory.Arguments;
+
+         loop
+            declare
+               Item : WebIDL.Arguments.Argument_Access;
+            begin
+               Argument (Item, Ok);
+               exit when not Ok;
+
+               Result.Append (Item);
+
+               exit when Next.Kind /= ',';
+
+               Expect (',', Ok);
+            end;
+         end loop;
+
+         Ok := True;
+      end ArgumentList;
+
+      ------------------
+      -- ArgumentName --
+      ------------------
+
+      procedure ArgumentName
+        (Result : out League.Strings.Universal_String;
+         Ok     : in out Boolean) is
+      begin
+         Expect (Identifier_Token, Ok);
+         Result := Next.Text;
+      end ArgumentName;
+
+      -----------------
+      -- Constructor --
+      -----------------
+
+      procedure Constructor
+        (Result : out WebIDL.Constructors.Constructor_Access;
+         Ok     : in out Boolean)
+      is
+         Args : WebIDL.Factories.Argument_Vector_Access;
+      begin
+         if not Ok then
+            return;
+         end if;
+
+         Expect (Constructor_Token, Ok);
+         Expect ('(', Ok);
+         ArgumentList (Args, Ok);
+         Expect (')', Ok);
+         Expect (';', Ok);
+         Result := Factory.Constructor (Args);
+      end Constructor;
 
       --------------------------------
       -- CallbackOrInterfaceOrMixin --
@@ -108,6 +229,24 @@ package body WebIDL.Parsers is
                Ok := False;
          end case;
       end Definition;
+
+      -------------------------
+      -- DistinguishableType --
+      -------------------------
+
+      procedure DistinguishableType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean) is
+      begin
+         case Next.Kind is
+            when Object_Token =>
+               Expect (Object_Token, Ok);
+               Result := Factory.Object;
+
+            when others =>
+               raise Program_Error;
+         end case;
+      end DistinguishableType;
 
       ----------
       -- Enum --
@@ -192,8 +331,18 @@ package body WebIDL.Parsers is
          Ok     : in out Boolean) is
          pragma Unreferenced (Result);
       begin
-         Ok := False;
-         null;
+         case Next.Kind is
+            when Constructor_Token =>
+               declare
+                  Item : WebIDL.Constructors.Constructor_Access;
+               begin
+                  Constructor (Item, Ok);
+                  Result := WebIDL.Interface_Members.Interface_Member_Access
+                    (Item);
+               end;
+            when others =>
+               Ok := False;
+         end case;
       end InterfaceMember;
 
       ----------------------
@@ -273,6 +422,31 @@ package body WebIDL.Parsers is
                Members => Members);
          end if;
       end InterfaceRest;
+
+      procedure ParseType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean)
+      is
+      begin
+         if Next.Kind = '(' then
+            raise Program_Error;  --  UnionType
+         else
+            SingleType (Result, Ok);
+         end if;
+      end ParseType;
+
+      procedure SingleType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean) is
+      begin
+         case Next.Kind is
+            when Any_Token =>
+               Expect (Any_Token, Ok);
+               Result := Factory.Any;
+            when others =>
+               DistinguishableType (Result, Ok);
+         end case;
+      end SingleType;
 
    begin
       Lexer.Next_Token (Next);

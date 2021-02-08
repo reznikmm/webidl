@@ -8,10 +8,13 @@ with Ada.Containers.Vectors;
 with League.String_Vectors;
 with League.Strings;
 
+with WebIDL.Arguments;
+with WebIDL.Constructors;
 with WebIDL.Enumerations;
 with WebIDL.Factories;
 with WebIDL.Interface_Members;
 with WebIDL.Interfaces;
+with WebIDL.Types;
 
 package WebIDL.Simple_Factories is
    pragma Preelaborate;
@@ -33,6 +36,31 @@ package WebIDL.Simple_Factories is
       Parent  : League.Strings.Universal_String;
       Members : not null WebIDL.Factories.Interface_Member_Vector_Access)
         return not null WebIDL.Interfaces.Interface_Access;
+
+   overriding function Arguments (Self : in out Factory)
+     return not null WebIDL.Factories.Argument_Vector_Access;
+
+   overriding function Constructor
+     (Self : in out Factory;
+      Args : not null WebIDL.Factories.Argument_Vector_Access)
+        return not null WebIDL.Constructors.Constructor_Access;
+
+   overriding function Argument
+     (Self         : in out Factory;
+      Type_Def     : WebIDL.Types.Type_Access;
+      Name         : League.Strings.Universal_String;
+      Is_Optional  : Boolean;
+      Has_Ellipsis : Boolean)
+        return not null WebIDL.Arguments.Argument_Access;
+
+   overriding function Any (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function Object (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function Symbol (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
 
 private
 
@@ -76,6 +104,32 @@ private
         (Self : in out Member_Vector;
          Item : not null WebIDL.Interface_Members.Interface_Member_Access);
 
+      package Argument_Vectors is new Ada.Containers.Vectors
+        (Positive,
+         WebIDL.Arguments.Argument_Access,
+         WebIDL.Arguments."=");
+
+      type Argument_Vector is limited
+        new WebIDL.Factories.Argument_Vector
+        and WebIDL.Arguments.Iterators.Forward_Iterator with
+      record
+         Vector : Argument_Vectors.Vector;
+      end record;
+
+      type Argument_Vector_Access is access all Argument_Vector;
+
+      overriding function First (Self : Argument_Vector)
+        return WebIDL.Arguments.Cursor;
+
+      overriding function Next
+        (Self     : Argument_Vector;
+         Position : WebIDL.Arguments.Cursor)
+           return WebIDL.Arguments.Cursor;
+
+      overriding procedure Append
+        (Self : in out Argument_Vector;
+         Item : not null WebIDL.Arguments.Argument_Access);
+
       type Interfase is limited new WebIDL.Interfaces.An_Interface with record
          Name    : League.Strings.Universal_String;
          Parent  : League.Strings.Universal_String;
@@ -89,6 +143,75 @@ private
 
       overriding function Members (Self : Interfase)
         return WebIDL.Interface_Members.Interface_Member_Iterator_Access;
+
+      type Constructor is limited new WebIDL.Constructors.Constructor with
+      record
+         Arguments : aliased Argument_Vector;
+      end record;
+
+      type Constructor_Access is access all Constructor;
+
+      overriding function Arguments (Self : Constructor)
+        return not null WebIDL.Arguments.Argument_Iterator_Access;
+
+      type Argument is new WebIDL.Arguments.Argument with record
+         Name         : League.Strings.Universal_String;
+         Type_Def     : WebIDL.Types.Type_Access;
+         Is_Optional  : Boolean;
+         Has_Ellipsis : Boolean;
+      end record;
+
+      type Argument_Access is access all Argument;
+
+      overriding function Name (Self : Argument)
+        return League.Strings.Universal_String is (Self.Name);
+
+      overriding function Get_Type (Self : Argument)
+        return not null WebIDL.Types.Type_Access is (Self.Type_Def);
+
+      overriding function Is_Optional (Self : Argument) return Boolean is
+        (Self.Is_Optional);
+
+      overriding function Has_Ellipsis (Self : Argument) return Boolean is
+        (Self.Has_Ellipsis);
+
    end Nodes;
+
+   package Types is
+      function "+" (Text : Wide_Wide_String)
+        return League.Strings.Universal_String
+          renames League.Strings.To_Universal_String;
+
+      type Base is abstract limited new WebIDL.Types.Type_Definition with
+        null record;
+
+      overriding function Is_Nullable (Self : Base) return Boolean is (False);
+      overriding function Is_Integer (Self : Base) return Boolean is (False);
+      overriding function Is_Numeric (Self : Base) return Boolean is (False);
+      overriding function Is_Primiteive (Self : Base) return Boolean
+        is (False);
+
+      type Any_Type is new Base with null record;
+
+      overriding function Name (Self : Any_Type)
+        return League.Strings.Universal_String is (+"Any");
+
+      Any : aliased Any_Type;
+
+      type Object_Type is new Base with null record;
+
+      overriding function Name (Self : Object_Type)
+        return League.Strings.Universal_String is (+"Object");
+
+      Object : aliased Object_Type;
+
+      type Symbol_Type is new Base with null record;
+
+      overriding function Name (Self : Symbol_Type)
+        return League.Strings.Universal_String is (+"Symbol");
+
+      Symbol : aliased Symbol_Type;
+
+   end Types;
 
 end WebIDL.Simple_Factories;

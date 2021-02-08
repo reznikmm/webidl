@@ -3,6 +3,7 @@
 --  SPDX-License-Identifier: MIT
 -------------------------------------------------------------
 
+with WebIDL.Arguments;
 with WebIDL.Interface_Members;
 
 package WebIDL.Constructors is
@@ -13,5 +14,8 @@ package WebIDL.Constructors is
 
    type Constructor_Access is access all Constructor'Class
      with Storage_Size => 0;
+
+   not overriding function Arguments (Self : Constructor)
+     return not null WebIDL.Arguments.Argument_Iterator_Access is abstract;
 
 end WebIDL.Constructors;

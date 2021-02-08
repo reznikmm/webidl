@@ -148,6 +148,11 @@ package WebIDL.Factories is
    --  keys that are instances of K and values that are instances of V. K must
    --  be one of DOMString, USVString, or ByteString.
 
+   not overriding function Nullable
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access is abstract;
+
    not overriding function Buffer_Related_Type
      (Self : in out Factory;
       Name : League.Strings.Universal_String)

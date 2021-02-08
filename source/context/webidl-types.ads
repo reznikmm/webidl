@@ -14,9 +14,6 @@ package WebIDL.Types is
    not overriding function Name (Self : Type_Definition)
      return League.Strings.Universal_String is abstract;
 
-   not overriding function Is_Nullable (Self : Type_Definition)
-     return Boolean is abstract;
-
    not overriding function Is_Integer (Self : Type_Definition)
      return Boolean is abstract;
 
@@ -43,5 +40,14 @@ package WebIDL.Types is
 
    not overriding function Value_Type (Self : Record_Type)
      return not null Type_Access is abstract;
+
+   type Nullable is limited interface and Type_Definition;
+   --  A nullable type is an IDL type constructed from an existing type (called
+   --  the inner type), which just allows the additional value null to be a
+   --  member of its set of values. Nullable types are represented in IDL by
+   --  placing a U+003F QUESTION MARK ("?") character after an existing type.
+
+   not overriding function Inner_Type (Self : Nullable)
+     return not null WebIDL.Types.Type_Access is abstract;
 
 end WebIDL.Types;

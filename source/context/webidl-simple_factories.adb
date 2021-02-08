@@ -338,6 +338,32 @@ package body WebIDL.Simple_Factories is
       return WebIDL.Interfaces.Interface_Access (Result);
    end New_Interface;
 
+   --------------
+   -- Nullable --
+   --------------
+
+   overriding function Nullable
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access
+   is
+      Ok     : Boolean;
+      Name   : constant League.Strings.Universal_String := T.Name;
+      Cursor : Type_Maps.Cursor := Self.Nullables.Find (Name);
+      Result : Types.Nullable_Access;
+   begin
+      if not Type_Maps.Has_Element (Cursor) then
+         Result := new Types.Nullable'(Inner => T);
+         Self.Nullables.Insert
+           (Name,
+            WebIDL.Types.Type_Access (Result),
+            Cursor,
+            Ok);
+      end if;
+
+      return Type_Maps.Element (Cursor);
+   end Nullable;
+
    ------------
    -- Object --
    ------------

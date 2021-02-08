@@ -38,6 +38,7 @@ private
       Arrays      : Type_Maps.Map;
       Observables : Type_Maps.Map;
       Records     : Type_Maps.Map;
+      Nullables   : Type_Maps.Map;
    end record;
 
    overriding function Enumeration
@@ -141,6 +142,11 @@ private
      (Self  : in out Factory;
       Key   : not null WebIDL.Types.Type_Access;
       Value : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access;
+
+   overriding function Nullable
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
         return not null WebIDL.Types.Type_Access;
 
    package Nodes is
@@ -266,7 +272,6 @@ private
       type Base is abstract limited new WebIDL.Types.Type_Definition with
         null record;
 
-      overriding function Is_Nullable (Self : Base) return Boolean is (False);
       overriding function Is_Integer (Self : Base) return Boolean is (False);
       overriding function Is_Numeric (Self : Base) return Boolean is (False);
       overriding function Is_Primiteive (Self : Base) return Boolean
@@ -462,6 +467,20 @@ private
 
       overriding function Value_Type (Self : Record_Type)
         return not null WebIDL.Types.Type_Access is (Self.Value);
+
+      type Nullable is new Base and WebIDL.Types.Nullable
+      with record
+         Inner : WebIDL.Types.Type_Access;
+      end record;
+
+      type Nullable_Access is access all Nullable;
+
+      overriding function Name (Self : Nullable)
+        return League.Strings.Universal_String is
+          (Self.Inner.Name & "OrNull");
+
+      overriding function Inner_Type (Self : Nullable)
+        return not null WebIDL.Types.Type_Access is (Self.Inner);
 
       type Buffer_Type is new Base with record
          Name : League.Strings.Universal_String;

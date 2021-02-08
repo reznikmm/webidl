@@ -357,6 +357,11 @@ package body WebIDL.Parsers is
             when others =>
                raise Program_Error;
          end case;
+
+         if Ok and Next.Kind = '?' then
+            Expect ('?', Ok);
+            Result := Factory.Nullable (Result);
+         end if;
       end DistinguishableType;
 
       ----------

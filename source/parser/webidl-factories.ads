@@ -94,4 +94,16 @@ package WebIDL.Factories is
       Double     : Boolean)
         return not null WebIDL.Types.Type_Access is abstract;
 
+   not overriding function Bool (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is abstract;
+
+   not overriding function Byte (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is abstract;
+
+   not overriding function Octet (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is abstract;
+
+   not overriding function BigInt (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is abstract;
+
 end WebIDL.Factories;

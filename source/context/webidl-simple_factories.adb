@@ -130,6 +130,36 @@ package body WebIDL.Simple_Factories is
       return WebIDL.Factories.Argument_Vector_Access (Result);
    end Arguments;
 
+   ------------
+   -- BigInt --
+   ------------
+
+   overriding function BigInt (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.BigInt'Access;
+   end BigInt;
+
+   ----------
+   -- Bool --
+   ----------
+
+   overriding function Bool (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.Bool'Access;
+   end Bool;
+
+   ----------
+   -- Byte --
+   ----------
+
+   overriding function Byte (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.Byte'Access;
+   end Byte;
+
    -----------------
    -- Constructor --
    -----------------
@@ -246,6 +276,16 @@ package body WebIDL.Simple_Factories is
    begin
       return Types.Object'Access;
    end Object;
+
+   -----------
+   -- Octet --
+   -----------
+
+   overriding function Octet (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.Octet'Access;
+   end Octet;
 
    ------------
    -- Symbol --

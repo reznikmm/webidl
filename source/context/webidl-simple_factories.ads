@@ -65,6 +65,18 @@ package WebIDL.Simple_Factories is
    overriding function Undefined (Self : in out Factory)
      return not null WebIDL.Types.Type_Access;
 
+   overriding function Bool (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function Byte (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function Octet (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function BigInt (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
    overriding function Integer
      (Self        : in out Factory;
       Is_Unsigned : Boolean;
@@ -289,6 +301,34 @@ private
         return League.Strings.Universal_String is (+"Double");
 
       Double : aliased Double_Type;
+
+      type Bool_Type is new Base with null record;
+
+      overriding function Name (Self : Bool_Type)
+        return League.Strings.Universal_String is (+"Boolean");
+
+      Bool : aliased Bool_Type;
+
+      type Byte_Type is new Base with null record;
+
+      overriding function Name (Self : Byte_Type)
+        return League.Strings.Universal_String is (+"Byte");
+
+      Byte : aliased Byte_Type;
+
+      type Octet_Type is new Base with null record;
+
+      overriding function Name (Self : Octet_Type)
+        return League.Strings.Universal_String is (+"Octet");
+
+      Octet : aliased Octet_Type;
+
+      type BigInt_Type is new Base with null record;
+
+      overriding function Name (Self : BigInt_Type)
+        return League.Strings.Universal_String is (+"BigInt");
+
+      BigInt : aliased BigInt_Type;
 
    end Types;
 

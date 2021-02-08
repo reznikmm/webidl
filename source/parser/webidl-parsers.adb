@@ -254,6 +254,27 @@ package body WebIDL.Parsers is
 
             when Unrestricted_Token | Float_Token | Double_Token =>
                UnrestrictedFloatType (Result, Ok);
+
+            when Undefined_Token =>
+               Expect (Undefined_Token, Ok);
+               Result := Factory.Undefined;
+
+            when Boolean_Token =>
+               Expect (Boolean_Token, Ok);
+               Result := Factory.Bool;
+
+            when Byte_Token =>
+               Expect (Byte_Token, Ok);
+               Result := Factory.Byte;
+
+            when Octet_Token =>
+               Expect (Octet_Token, Ok);
+               Result := Factory.Octet;
+
+            when Bigint_Token =>
+               Expect (Bigint_Token, Ok);
+               Result := Factory.BigInt;
+
             when others =>
                raise Program_Error;
          end case;

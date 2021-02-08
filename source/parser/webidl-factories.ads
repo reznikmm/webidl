@@ -119,6 +119,16 @@ package WebIDL.Factories is
      (Self : in out Factory;
       T    : not null WebIDL.Types.Type_Access)
      return not null WebIDL.Types.Type_Access is abstract;
+   --  The sequence<T> type is a parameterized type whose values are (possibly
+   --  zero-length) lists of values of type T.
+
+   not overriding function Frozen_Array
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+     return not null WebIDL.Types.Type_Access is abstract;
+   --  A frozen array type is a parameterized type whose values are references
+   --  to objects that hold a fixed length array of unmodifiable values. The
+   --  values in the array are of type T.
 
    not overriding function Buffer_Related_Type
      (Self : in out Factory;

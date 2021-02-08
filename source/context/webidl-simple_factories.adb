@@ -254,6 +254,32 @@ package body WebIDL.Simple_Factories is
       end if;
    end Float;
 
+   ------------------
+   -- Frozen_Array --
+   ------------------
+
+   overriding function Frozen_Array
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access
+   is
+      Ok     : Boolean;
+      Name   : constant League.Strings.Universal_String := T.Name;
+      Cursor : Type_Maps.Cursor := Self.Arrays.Find (Name);
+      Result : Types.Frozen_Array_Access;
+   begin
+      if not Type_Maps.Has_Element (Cursor) then
+         Result := new Types.Frozen_Array'(Element => T);
+         Self.Arrays.Insert
+           (Name,
+            WebIDL.Types.Type_Access (Result),
+            Cursor,
+            Ok);
+      end if;
+
+      return Type_Maps.Element (Cursor);
+   end Frozen_Array;
+
    -------------
    -- Integer --
    -------------

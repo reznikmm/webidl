@@ -88,4 +88,10 @@ package WebIDL.Factories is
       Long        : Natural)
         return not null WebIDL.Types.Type_Access is abstract;
 
+   not overriding function Float
+     (Self       : in out Factory;
+      Restricted : Boolean;
+      Double     : Boolean)
+        return not null WebIDL.Types.Type_Access is abstract;
+
 end WebIDL.Factories;

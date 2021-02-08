@@ -162,6 +162,27 @@ package body WebIDL.Simple_Factories is
       return WebIDL.Enumerations.Enumeration_Access (Result);
    end Enumeration;
 
+   -----------
+   -- Float --
+   -----------
+
+   overriding function Float
+     (Self       : in out Factory;
+      Restricted : Boolean;
+      Double     : Boolean)
+        return not null WebIDL.Types.Type_Access is
+   begin
+      if Double then
+         return Types.Double'Access;
+      else
+         return Types.Float'Access;
+      end if;
+   end Float;
+
+   -------------
+   -- Integer --
+   -------------
+
    overriding function Integer
      (Self        : in out Factory;
       Is_Unsigned : Boolean;

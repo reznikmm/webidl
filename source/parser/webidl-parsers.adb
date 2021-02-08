@@ -88,6 +88,9 @@ package body WebIDL.Parsers is
       procedure ParseType
         (Result : out WebIDL.Types.Type_Access;
          Ok     : in out Boolean);
+      procedure UnrestrictedFloatType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
       procedure UnsignedIntegerType
         (Result : out WebIDL.Types.Type_Access;
          Ok     : in out Boolean);
@@ -248,6 +251,9 @@ package body WebIDL.Parsers is
 
             when Short_Token | Long_Token | Unsigned_Token =>
                UnsignedIntegerType (Result, Ok);
+
+            when Unrestricted_Token | Float_Token | Double_Token =>
+               UnrestrictedFloatType (Result, Ok);
             when others =>
                raise Program_Error;
          end case;
@@ -452,6 +458,30 @@ package body WebIDL.Parsers is
                DistinguishableType (Result, Ok);
          end case;
       end SingleType;
+
+      procedure UnrestrictedFloatType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean)
+      is
+         Restricted : Boolean := True;
+         Double     : Boolean := False;
+      begin
+         if Next.Kind = Unrestricted_Token then
+            Expect (Unrestricted_Token, Ok);
+            Restricted := False;
+         end if;
+
+         if Next.Kind = Float_Token then
+            Expect (Float_Token, Ok);
+         else
+            Expect (Double_Token, Ok);
+            Double := True;
+         end if;
+
+         if Ok then
+            Result := Factory.Float (Restricted, Double);
+         end if;
+      end UnrestrictedFloatType;
 
       procedure UnsignedIntegerType
         (Result : out WebIDL.Types.Type_Access;

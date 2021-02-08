@@ -71,6 +71,12 @@ package WebIDL.Simple_Factories is
       Long        : Natural)
         return not null WebIDL.Types.Type_Access;
 
+   overriding function Float
+     (Self       : in out Factory;
+      Restricted : Boolean;
+      Double     : Boolean)
+        return not null WebIDL.Types.Type_Access;
+
 private
 
    package Nodes is
@@ -269,6 +275,20 @@ private
         return League.Strings.Universal_String is (+"UnsignedLongLong");
 
       Unsigned_Long_Long : aliased Unsigned_Long_Long_Type;
+
+      type Float_Type is new Base with null record;
+
+      overriding function Name (Self : Float_Type)
+        return League.Strings.Universal_String is (+"Float");
+
+      Float : aliased Float_Type;
+
+      type Double_Type is new Base with null record;
+
+      overriding function Name (Self : Double_Type)
+        return League.Strings.Universal_String is (+"Double");
+
+      Double : aliased Double_Type;
 
    end Types;
 

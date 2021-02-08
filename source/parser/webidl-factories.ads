@@ -125,7 +125,7 @@ package WebIDL.Factories is
    not overriding function Frozen_Array
      (Self : in out Factory;
       T    : not null WebIDL.Types.Type_Access)
-     return not null WebIDL.Types.Type_Access is abstract;
+        return not null WebIDL.Types.Type_Access is abstract;
    --  A frozen array type is a parameterized type whose values are references
    --  to objects that hold a fixed length array of unmodifiable values. The
    --  values in the array are of type T.
@@ -133,11 +133,20 @@ package WebIDL.Factories is
    not overriding function Observable_Array
      (Self : in out Factory;
       T    : not null WebIDL.Types.Type_Access)
-     return not null WebIDL.Types.Type_Access is abstract;
+        return not null WebIDL.Types.Type_Access is abstract;
    --  An observable array type is a parameterized type whose values are
    --  references to a combination of a mutable list of objects of type T, as
    --  well as behavior to perform when author code modifies the contents of
    --  the list.
+
+   not overriding function Record_Type
+     (Self  : in out Factory;
+      Key   : not null WebIDL.Types.Type_Access;
+      Value : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access is abstract;
+   --  A record type is a parameterized type whose values are ordered maps with
+   --  keys that are instances of K and values that are instances of V. K must
+   --  be one of DOMString, USVString, or ByteString.
 
    not overriding function Buffer_Related_Type
      (Self : in out Factory;

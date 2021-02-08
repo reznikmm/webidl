@@ -88,6 +88,9 @@ package body WebIDL.Parsers is
       procedure ParseType
         (Result : out WebIDL.Types.Type_Access;
          Ok     : in out Boolean);
+      procedure RecordType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
       procedure UnrestrictedFloatType
         (Result : out WebIDL.Types.Type_Access;
          Ok     : in out Boolean);
@@ -348,6 +351,9 @@ package body WebIDL.Parsers is
                   end if;
                end;
 
+            when Record_Token =>
+               RecordType (Result, Ok);
+
             when others =>
                raise Program_Error;
          end case;
@@ -539,6 +545,25 @@ package body WebIDL.Parsers is
             SingleType (Result, Ok);
          end if;
       end ParseType;
+
+      procedure RecordType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean)
+      is
+         Key   : WebIDL.Types.Type_Access;
+         Value : WebIDL.Types.Type_Access;
+      begin
+         Expect (Record_Token, Ok);
+         Expect ('<', Ok);
+         ParseType (Key, Ok);
+         Expect (',', Ok);
+         ParseType (Value, Ok);
+         Expect ('>', Ok);
+
+         if Ok then
+            Result := Factory.Record_Type (Key, Value);
+         end if;
+      end RecordType;
 
       procedure SingleType
         (Result : out WebIDL.Types.Type_Access;

@@ -384,6 +384,35 @@ package body WebIDL.Simple_Factories is
       return Types.Octet'Access;
    end Octet;
 
+   -----------------
+   -- Record_Type --
+   -----------------
+
+   overriding function Record_Type
+     (Self  : in out Factory;
+      Key   : not null WebIDL.Types.Type_Access;
+      Value : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access
+   is
+      use type League.Strings.Universal_String;
+      Ok     : Boolean;
+      Name   : constant League.Strings.Universal_String :=
+        Key.Name & "/" & Value.Name;
+      Cursor : Type_Maps.Cursor := Self.Records.Find (Name);
+      Result : Types.Record_Type_Access;
+   begin
+      if not Type_Maps.Has_Element (Cursor) then
+         Result := new Types.Record_Type'(Key, Value);
+         Self.Records.Insert
+           (Name,
+            WebIDL.Types.Type_Access (Result),
+            Cursor,
+            Ok);
+      end if;
+
+      return Type_Maps.Element (Cursor);
+   end Record_Type;
+
    --------------
    -- Sequence --
    --------------

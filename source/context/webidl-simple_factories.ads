@@ -37,6 +37,7 @@ private
       Buffers     : Type_Maps.Map;
       Arrays      : Type_Maps.Map;
       Observables : Type_Maps.Map;
+      Records     : Type_Maps.Map;
    end record;
 
    overriding function Enumeration
@@ -134,6 +135,12 @@ private
    overriding function Observable_Array
      (Self : in out Factory;
       T    : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access;
+
+   overriding function Record_Type
+     (Self  : in out Factory;
+      Key   : not null WebIDL.Types.Type_Access;
+      Value : not null WebIDL.Types.Type_Access)
         return not null WebIDL.Types.Type_Access;
 
    package Nodes is
@@ -398,7 +405,7 @@ private
 
       USVString : aliased USVString_Type;
 
-      type Sequence is new Base with record
+      type Sequence is new Base and WebIDL.Types.Parameterized_Type with record
          Element : WebIDL.Types.Type_Access;
       end record;
 
@@ -408,7 +415,11 @@ private
         return League.Strings.Universal_String is
           (Self.Element.Name & "Sequence");
 
-      type Frozen_Array is new Base with record
+      overriding function Parameter (Self : Sequence)
+        return not null WebIDL.Types.Type_Access is (Self.Element);
+
+      type Frozen_Array is new Base and WebIDL.Types.Parameterized_Type with
+      record
          Element : WebIDL.Types.Type_Access;
       end record;
 
@@ -418,7 +429,11 @@ private
         return League.Strings.Universal_String is
           (Self.Element.Name & "Array");
 
-      type Observable_Array is new Base with record
+      overriding function Parameter (Self : Frozen_Array)
+        return not null WebIDL.Types.Type_Access is (Self.Element);
+
+      type Observable_Array is new Base and WebIDL.Types.Parameterized_Type
+      with record
          Element : WebIDL.Types.Type_Access;
       end record;
 
@@ -427,6 +442,26 @@ private
       overriding function Name (Self : Observable_Array)
         return League.Strings.Universal_String is
           (Self.Element.Name & "ObservableArray");
+
+      overriding function Parameter (Self : Observable_Array)
+        return not null WebIDL.Types.Type_Access is (Self.Element);
+
+      type Record_Type is new Base and WebIDL.Types.Record_Type with record
+         Key   : WebIDL.Types.Type_Access;
+         Value : WebIDL.Types.Type_Access;
+      end record;
+
+      type Record_Type_Access is access all Record_Type;
+
+      overriding function Name (Self : Record_Type)
+        return League.Strings.Universal_String is
+          (Self.Key.Name & Self.Value.Name & "Record");
+
+      overriding function Key_Type (Self : Record_Type)
+        return not null WebIDL.Types.Type_Access is (Self.Key);
+
+      overriding function Value_Type (Self : Record_Type)
+        return not null WebIDL.Types.Type_Access is (Self.Value);
 
       type Buffer_Type is new Base with record
          Name : League.Strings.Universal_String;

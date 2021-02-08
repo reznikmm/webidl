@@ -33,4 +33,15 @@ package WebIDL.Types is
    not overriding function Parameter (Self : Parameterized_Type)
      return not null Type_Access is abstract;
 
+   type Record_Type is limited interface and Type_Definition;
+   --  A record type is a parameterized type whose values are ordered maps with
+   --  keys that are instances of K and values that are instances of V. K must
+   --  be one of DOMString, USVString, or ByteString.
+
+   not overriding function Key_Type (Self : Record_Type)
+     return not null Type_Access is abstract;
+
+   not overriding function Value_Type (Self : Record_Type)
+     return not null Type_Access is abstract;
+
 end WebIDL.Types;

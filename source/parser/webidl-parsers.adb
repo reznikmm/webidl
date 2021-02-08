@@ -88,6 +88,9 @@ package body WebIDL.Parsers is
       procedure ParseType
         (Result : out WebIDL.Types.Type_Access;
          Ok     : in out Boolean);
+      procedure UnsignedIntegerType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
 
       --------------
       -- Argument --
@@ -243,6 +246,8 @@ package body WebIDL.Parsers is
                Expect (Object_Token, Ok);
                Result := Factory.Object;
 
+            when Short_Token | Long_Token | Unsigned_Token =>
+               UnsignedIntegerType (Result, Ok);
             when others =>
                raise Program_Error;
          end case;
@@ -447,6 +452,36 @@ package body WebIDL.Parsers is
                DistinguishableType (Result, Ok);
          end case;
       end SingleType;
+
+      procedure UnsignedIntegerType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean)
+      is
+         Unsigned : Boolean := False;
+         Long     : Natural := 0;
+      begin
+         if Next.Kind = Unsigned_Token then
+            Unsigned := True;
+            Expect (Unsigned_Token, Ok);
+         end if;
+
+         case Next.Kind is
+            when Short_Token =>
+               Expect (Short_Token, Ok);
+            when others =>
+               Expect (Long_Token, Ok);
+               Long := Boolean'Pos (Ok);
+
+               if Ok and Next.Kind = Long_Token then
+                  Expect (Long_Token, Ok);
+                  Long := 2;
+               end if;
+         end case;
+
+         if Ok then
+            Result := Factory.Integer (Unsigned, Long);
+         end if;
+      end UnsignedIntegerType;
 
    begin
       Lexer.Next_Token (Next);

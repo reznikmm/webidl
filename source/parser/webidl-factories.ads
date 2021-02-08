@@ -79,4 +79,13 @@ package WebIDL.Factories is
    not overriding function Symbol (Self : in out Factory)
      return not null WebIDL.Types.Type_Access is abstract;
 
+   not overriding function Undefined (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is abstract;
+
+   not overriding function Integer
+     (Self        : in out Factory;
+      Is_Unsigned : Boolean;
+      Long        : Natural)
+        return not null WebIDL.Types.Type_Access is abstract;
+
 end WebIDL.Factories;

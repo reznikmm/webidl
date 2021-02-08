@@ -62,6 +62,15 @@ package WebIDL.Simple_Factories is
    overriding function Symbol (Self : in out Factory)
      return not null WebIDL.Types.Type_Access;
 
+   overriding function Undefined (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function Integer
+     (Self        : in out Factory;
+      Is_Unsigned : Boolean;
+      Long        : Natural)
+        return not null WebIDL.Types.Type_Access;
+
 private
 
    package Nodes is
@@ -211,6 +220,55 @@ private
         return League.Strings.Universal_String is (+"Symbol");
 
       Symbol : aliased Symbol_Type;
+
+      type Undefined_Type is new Base with null record;
+
+      overriding function Name (Self : Undefined_Type)
+        return League.Strings.Universal_String is (+"Undefined");
+
+      Undefined : aliased Undefined_Type;
+
+      type Short_Type is new Base with null record;
+
+      overriding function Name (Self : Short_Type)
+        return League.Strings.Universal_String is (+"Short");
+
+      Short : aliased Short_Type;
+
+      type Long_Type is new Base with null record;
+
+      overriding function Name (Self : Long_Type)
+        return League.Strings.Universal_String is (+"Long");
+
+      Long : aliased Long_Type;
+
+      type Long_Long_Type is new Base with null record;
+
+      overriding function Name (Self : Long_Long_Type)
+        return League.Strings.Universal_String is (+"LongLong");
+
+      Long_Long : aliased Long_Long_Type;
+
+      type Unsigned_Short_Type is new Base with null record;
+
+      overriding function Name (Self : Unsigned_Short_Type)
+        return League.Strings.Universal_String is (+"UnsignedShort");
+
+      Unsigned_Short : aliased Unsigned_Short_Type;
+
+      type Unsigned_Long_Type is new Base with null record;
+
+      overriding function Name (Self : Unsigned_Long_Type)
+        return League.Strings.Universal_String is (+"UnsignedLong");
+
+      Unsigned_Long : aliased Unsigned_Long_Type;
+
+      type Unsigned_Long_Long_Type is new Base with null record;
+
+      overriding function Name (Self : Unsigned_Long_Long_Type)
+        return League.Strings.Universal_String is (+"UnsignedLongLong");
+
+      Unsigned_Long_Long : aliased Unsigned_Long_Long_Type;
 
    end Types;
 

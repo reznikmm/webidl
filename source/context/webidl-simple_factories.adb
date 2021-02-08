@@ -162,6 +162,29 @@ package body WebIDL.Simple_Factories is
       return WebIDL.Enumerations.Enumeration_Access (Result);
    end Enumeration;
 
+   overriding function Integer
+     (Self        : in out Factory;
+      Is_Unsigned : Boolean;
+      Long        : Natural)
+        return not null WebIDL.Types.Type_Access is
+   begin
+      if Is_Unsigned then
+         if Long = 0 then
+            return Types.Unsigned_Short'Access;
+         elsif Long = 1 then
+            return Types.Unsigned_Long'Access;
+         else
+            return Types.Unsigned_Long_Long'Access;
+         end if;
+      elsif Long = 0 then
+         return Types.Short'Access;
+      elsif Long = 1 then
+         return Types.Long'Access;
+      else
+         return Types.Long_Long'Access;
+      end if;
+   end Integer;
+
    -----------------------
    -- Interface_Members --
    -----------------------
@@ -212,5 +235,15 @@ package body WebIDL.Simple_Factories is
    begin
       return Types.Symbol'Access;
    end Symbol;
+
+   ---------------
+   -- Undefined --
+   ---------------
+
+   overriding function Undefined (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.Undefined'Access;
+   end Undefined;
 
 end WebIDL.Simple_Factories;

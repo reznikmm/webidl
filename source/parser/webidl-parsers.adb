@@ -301,6 +301,10 @@ package body WebIDL.Parsers is
                Expect (Object_Token, Ok);
                Result := Factory.Object;
 
+            when Symbol_Token =>
+               Expect (Symbol_Token, Ok);
+               Result := Factory.Symbol;
+
             when others =>
                raise Program_Error;
          end case;

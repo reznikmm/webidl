@@ -39,6 +39,7 @@ private
       Observables : Type_Maps.Map;
       Records     : Type_Maps.Map;
       Nullables   : Type_Maps.Map;
+      Promises    : Type_Maps.Map;
    end record;
 
    overriding function Enumeration
@@ -149,6 +150,19 @@ private
       T    : not null WebIDL.Types.Type_Access)
         return not null WebIDL.Types.Type_Access;
 
+   overriding function Promise
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function Union_Members (Self : in out Factory)
+     return not null WebIDL.Factories.Union_Member_Vector_Access;
+
+   overriding function Union
+     (Self : in out Factory;
+      T    : not null WebIDL.Factories.Union_Member_Vector_Access)
+        return not null WebIDL.Types.Type_Access;
+
    package Nodes is
       type Enumeration is new WebIDL.Enumerations.Enumeration with record
          Name   : League.Strings.Universal_String;
@@ -214,6 +228,32 @@ private
       overriding procedure Append
         (Self : in out Argument_Vector;
          Item : not null WebIDL.Arguments.Argument_Access);
+
+      package Type_Vectors is new Ada.Containers.Vectors
+        (Positive,
+         WebIDL.Types.Type_Access,
+         WebIDL.Types."=");
+
+      type Union_Member_Vector is limited
+        new WebIDL.Factories.Union_Member_Vector
+        and WebIDL.Types.Iterators.Forward_Iterator with
+      record
+         Vector : Type_Vectors.Vector;
+      end record;
+
+      type Union_Member_Vector_Access is access all Union_Member_Vector;
+
+      overriding function First (Self : Union_Member_Vector)
+        return WebIDL.Types.Cursor;
+
+      overriding function Next
+        (Self     : Union_Member_Vector;
+         Position : WebIDL.Types.Cursor)
+           return WebIDL.Types.Cursor;
+
+      overriding procedure Append
+        (Self : in out Union_Member_Vector;
+         Item : not null WebIDL.Types.Type_Access);
 
       type Interfase is limited new WebIDL.Interfaces.An_Interface with record
          Name    : League.Strings.Universal_String;
@@ -482,6 +522,19 @@ private
       overriding function Inner_Type (Self : Nullable)
         return not null WebIDL.Types.Type_Access is (Self.Inner);
 
+      type Promise is new Base and WebIDL.Types.Parameterized_Type with record
+         Element : WebIDL.Types.Type_Access;
+      end record;
+
+      type Promise_Access is access all Promise;
+
+      overriding function Name (Self : Promise)
+        return League.Strings.Universal_String is
+          (Self.Element.Name & "Promise");
+
+      overriding function Parameter (Self : Promise)
+        return not null WebIDL.Types.Type_Access is (Self.Element);
+
       type Buffer_Type is new Base with record
          Name : League.Strings.Universal_String;
       end record;
@@ -490,6 +543,18 @@ private
 
       overriding function Name (Self : Buffer_Type)
         return League.Strings.Universal_String is (Self.Name);
+
+      type Union is new Base and WebIDL.Types.Union with record
+         Member : aliased Nodes.Union_Member_Vector;
+      end record;
+
+      type Union_Access is access all Union;
+
+      overriding function Name (Self : Union)
+        return League.Strings.Universal_String;
+
+      overriding function Members (Self : Union)
+        return not null WebIDL.Types.Type_Iterator_Access;
 
    end Types;
 

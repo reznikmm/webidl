@@ -38,6 +38,16 @@ package body WebIDL.Simple_Factories is
          end if;
       end First;
 
+      overriding function First (Self : Union_Member_Vector)
+        return WebIDL.Types.Cursor is
+      begin
+         if Self.Vector.Is_Empty then
+            return (1, null);
+         else
+            return (1, Self.Vector.First_Element);
+         end if;
+      end First;
+
       overriding function Next
         (Self     : Member_Vector;
          Position : WebIDL.Interface_Members.Cursor)
@@ -62,6 +72,18 @@ package body WebIDL.Simple_Factories is
          end if;
       end Next;
 
+      overriding function Next
+        (Self     : Union_Member_Vector;
+         Position : WebIDL.Types.Cursor)
+           return WebIDL.Types.Cursor is
+      begin
+         if Position.Index >= Self.Vector.Last_Index then
+            return (Self.Vector.Last_Index + 1, null);
+         else
+            return (Position.Index + 1, Self.Vector (Position.Index + 1));
+         end if;
+      end Next;
+
       overriding procedure Append
         (Self : in out Member_Vector;
          Item : not null WebIDL.Interface_Members.Interface_Member_Access) is
@@ -72,6 +94,13 @@ package body WebIDL.Simple_Factories is
       overriding procedure Append
         (Self : in out Argument_Vector;
          Item : not null WebIDL.Arguments.Argument_Access) is
+      begin
+         Self.Vector.Append (Item);
+      end Append;
+
+      overriding procedure Append
+        (Self : in out Union_Member_Vector;
+         Item : not null WebIDL.Types.Type_Access) is
       begin
          Self.Vector.Append (Item);
       end Append;
@@ -87,6 +116,33 @@ package body WebIDL.Simple_Factories is
       end Members;
 
    end Nodes;
+
+   package body Types is
+      overriding function Name (Self : Union)
+        return League.Strings.Universal_String
+      is
+         Result : League.Strings.Universal_String :=
+           Self.Member.Vector.First_Element.Name;
+      begin
+         for J in 2 .. Self.Member.Vector.Last_Index loop
+            Result.Append ("Or");
+            Result.Append (Self.Member.Vector.Element (J).Name);
+         end loop;
+
+         return Result;
+      end Name;
+
+      type Type_Vector_C_Access is access constant Nodes.Union_Member_Vector;
+
+      overriding function Members (Self : Union)
+        return not null WebIDL.Types.Type_Iterator_Access
+      is
+         X : constant Type_Vector_C_Access :=
+           Self.Member'Unchecked_Access;
+      begin
+         return WebIDL.Types.Type_Iterator_Access (X);
+      end Members;
+   end Types;
 
    ---------
    -- Any --
@@ -410,6 +466,32 @@ package body WebIDL.Simple_Factories is
       return Types.Octet'Access;
    end Octet;
 
+   -------------
+   -- Promise --
+   -------------
+
+   overriding function Promise
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+     return not null WebIDL.Types.Type_Access
+   is
+      Ok     : Boolean;
+      Name   : constant League.Strings.Universal_String := T.Name;
+      Cursor : Type_Maps.Cursor := Self.Promises.Find (Name);
+      Result : Types.Promise_Access;
+   begin
+      if not Type_Maps.Has_Element (Cursor) then
+         Result := new Types.Promise'(Element => T);
+         Self.Promises.Insert
+           (Name,
+            WebIDL.Types.Type_Access (Result),
+            Cursor,
+            Ok);
+      end if;
+
+      return Type_Maps.Element (Cursor);
+   end Promise;
+
    -----------------
    -- Record_Type --
    -----------------
@@ -484,6 +566,36 @@ package body WebIDL.Simple_Factories is
    begin
       return Types.Undefined'Access;
    end Undefined;
+
+   -----------
+   -- Union --
+   -----------
+
+   overriding function Union
+     (Self : in out Factory;
+      T    : not null WebIDL.Factories.Union_Member_Vector_Access)
+        return not null WebIDL.Types.Type_Access
+   is
+      Result : constant Types.Union_Access := new Types.Union'
+        (Member => <>);
+   begin
+      Result.Member.Vector := Nodes.Union_Member_Vector (T.all).Vector;
+
+      return WebIDL.Types.Type_Access (Result);
+   end Union;
+
+   -------------------
+   -- Union_Members --
+   -------------------
+
+   overriding function Union_Members (Self : in out Factory)
+     return not null WebIDL.Factories.Union_Member_Vector_Access
+   is
+      Result : constant Nodes.Union_Member_Vector_Access :=
+        new Nodes.Union_Member_Vector;
+   begin
+      return WebIDL.Factories.Union_Member_Vector_Access (Result);
+   end Union_Members;
 
    ---------------
    -- USVString --

@@ -153,9 +153,36 @@ package WebIDL.Factories is
       T    : not null WebIDL.Types.Type_Access)
         return not null WebIDL.Types.Type_Access is abstract;
 
+   not overriding function Promise
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+     return not null WebIDL.Types.Type_Access is abstract;
+   --  A promise type is a parameterized type whose values are references
+   --  to objects that “is used as a place holder for the eventual results
+   --  of a deferred (and possibly asynchronous) computation result of an
+   --  asynchronous operation”.
+
    not overriding function Buffer_Related_Type
      (Self : in out Factory;
       Name : League.Strings.Universal_String)
+        return not null WebIDL.Types.Type_Access is abstract;
+
+   type Union_Member_Vector is limited interface;
+   type Union_Member_Vector_Access is access all
+     Union_Member_Vector'Class
+       with Storage_Size => 0;
+
+   not overriding procedure Append
+     (Self : in out Union_Member_Vector;
+      Item : not null WebIDL.Types.Type_Access)
+        is abstract;
+
+   not overriding function Union_Members (Self : in out Factory)
+     return not null Union_Member_Vector_Access is abstract;
+
+   not overriding function Union
+     (Self : in out Factory;
+      T    : not null Union_Member_Vector_Access)
         return not null WebIDL.Types.Type_Access is abstract;
 
 end WebIDL.Factories;

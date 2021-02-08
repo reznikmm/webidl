@@ -79,7 +79,16 @@ package body WebIDL.Parsers is
       procedure InterfaceRest
         (Result : out WebIDL.Interfaces.Interface_Access;
          Ok     : in out Boolean);
+      procedure PromiseType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
       procedure DistinguishableType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
+      procedure UnionType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean);
+      procedure UnionMemberType
         (Result : out WebIDL.Types.Type_Access;
          Ok     : in out Boolean);
       procedure SingleType
@@ -285,6 +294,9 @@ package body WebIDL.Parsers is
             when USVString_Token =>
                Expect (USVString_Token, Ok);
                Result := Factory.USVString;
+
+            when Identifier_Token =>
+               raise Program_Error;
 
             when Sequence_Token =>
                declare
@@ -545,11 +557,32 @@ package body WebIDL.Parsers is
       is
       begin
          if Next.Kind = '(' then
-            raise Program_Error;  --  UnionType
+            UnionType (Result, Ok);
+
+            if Ok and Next.Kind = '?' then
+               Expect ('?', Ok);
+               Result := Factory.Nullable (Result);
+            end if;
          else
             SingleType (Result, Ok);
          end if;
       end ParseType;
+
+      procedure PromiseType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean)
+      is
+         T : WebIDL.Types.Type_Access;
+      begin
+         Expect (Promise_Token, Ok);
+         Expect ('<', Ok);
+         ParseType (T, Ok);
+         Expect ('>', Ok);
+
+         if Ok then
+            Result := Factory.Promise (T);
+         end if;
+      end PromiseType;
 
       procedure RecordType
         (Result : out WebIDL.Types.Type_Access;
@@ -575,13 +608,122 @@ package body WebIDL.Parsers is
          Ok     : in out Boolean) is
       begin
          case Next.Kind is
+            when Short_Token | Long_Token | Unsigned_Token |
+                 Unrestricted_Token | Float_Token | Double_Token |
+                 Undefined_Token |
+                 Boolean_Token |
+                 Byte_Token |
+                 Octet_Token |
+                 Bigint_Token |
+                 DOMString_Token |
+                 ByteString_Token |
+                 USVString_Token |
+                 Identifier_Token |
+                 Sequence_Token |
+                 Object_Token |
+                 Symbol_Token |
+                 ArrayBuffer_Token |
+                 DataView_Token |
+                 Int8Array_Token |
+                 Int16Array_Token |
+                 Int32Array_Token |
+                 Uint8Array_Token |
+                 Uint16Array_Token |
+                 Uint32Array_Token |
+                 Uint8ClampedArray_Token |
+                 Float32Array_Token |
+                 Float64Array_Token |
+                 FrozenArray_Token |
+                 ObservableArray_Token |
+                 Record_Token =>
+
+               DistinguishableType (Result, Ok);
+
             when Any_Token =>
                Expect (Any_Token, Ok);
                Result := Factory.Any;
+
+            when Promise_Token =>
+               PromiseType (Result, Ok);
+
+            when others =>
+               raise Program_Error;
+         end case;
+      end SingleType;
+
+      ---------------------
+      -- UnionMemberType --
+      ---------------------
+
+      procedure UnionMemberType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean) is
+      begin
+         if not Ok then
+            return;
+         end if;
+
+         case Next.Kind is
+            when '(' =>
+               UnionType (Result, Ok);
+
+               if Ok and Next.Kind = '?' then
+                  Expect ('?', Ok);
+                  Result := Factory.Nullable (Result);
+               end if;
+
             when others =>
                DistinguishableType (Result, Ok);
          end case;
-      end SingleType;
+      end UnionMemberType;
+
+      ---------------
+      -- UnionType --
+      ---------------
+
+      procedure UnionType
+        (Result : out WebIDL.Types.Type_Access;
+         Ok     : in out Boolean)
+      is
+         Item   : WebIDL.Types.Type_Access;
+         Vector : constant WebIDL.Factories.Union_Member_Vector_Access :=
+           Factory.Union_Members;
+      begin
+         Expect ('(', Ok);
+         UnionMemberType (Item, Ok);
+
+         if Ok then
+            Vector.Append (Item);
+         end if;
+
+         Expect (Or_Token, Ok);
+         UnionMemberType (Item, Ok);
+
+         if Ok then
+            Vector.Append (Item);
+         end if;
+
+         while Next.Kind = Or_Token loop
+            Expect (Or_Token, Ok);
+            UnionMemberType (Item, Ok);
+
+            if Ok then
+               Vector.Append (Item);
+            else
+               exit;
+            end if;
+         end loop;
+
+         Expect (')', Ok);
+
+         if Ok then
+            Result := Factory.Union (Vector);
+         end if;
+      end UnionType;
+
+      ---------------------------
+      -- UnrestrictedFloatType --
+      ---------------------------
 
       procedure UnrestrictedFloatType
         (Result : out WebIDL.Types.Type_Access;

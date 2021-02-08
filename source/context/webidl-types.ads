@@ -3,12 +3,18 @@
 --  SPDX-License-Identifier: MIT
 -------------------------------------------------------------
 
+with Ada.Iterator_Interfaces;
+
 with League.Strings;
 
 package WebIDL.Types is
    pragma Preelaborate;
 
    type Type_Definition is limited interface;
+
+   function Assigned (Self : access Type_Definition'Class) return Boolean is
+     (Self /= null);
+
    type Type_Access is access all Type_Definition'Class with Storage_Size => 0;
 
    not overriding function Name (Self : Type_Definition)
@@ -49,5 +55,29 @@ package WebIDL.Types is
 
    not overriding function Inner_Type (Self : Nullable)
      return not null WebIDL.Types.Type_Access is abstract;
+
+   type Cursor is record
+      Index : Positive;
+      Item  : Type_Access;
+   end record;
+
+   function Has_Element (Self : Cursor) return Boolean is
+      (Self.Item.Assigned);
+
+   package Iterators is new Ada.Iterator_Interfaces (Cursor, Has_Element);
+
+   type Type_Iterator_Access is access constant
+     Iterators.Forward_Iterator'Class
+       with Storage_Size => 0;
+
+   type Union is limited interface and Type_Definition;
+   --  A union type is a type whose set of values is the union of those in two
+   --  or more other types. Union types (matching UnionType) are written as a
+   --  series of types separated by the or keyword with a set of surrounding
+   --  parentheses. The types which comprise the union type are known as the
+   --  union’s member types.
+
+   not overriding function Members (Self : Union)
+     return not null WebIDL.Types.Type_Iterator_Access is abstract;
 
 end WebIDL.Types;

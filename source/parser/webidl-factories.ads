@@ -120,4 +120,9 @@ package WebIDL.Factories is
       T    : not null WebIDL.Types.Type_Access)
      return not null WebIDL.Types.Type_Access is abstract;
 
+   not overriding function Buffer_Related_Type
+     (Self : in out Factory;
+      Name : League.Strings.Universal_String)
+        return not null WebIDL.Types.Type_Access is abstract;
+
 end WebIDL.Factories;

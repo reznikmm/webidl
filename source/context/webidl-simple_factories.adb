@@ -150,6 +150,31 @@ package body WebIDL.Simple_Factories is
       return Types.Bool'Access;
    end Bool;
 
+   -------------------------
+   -- Buffer_Related_Type --
+   -------------------------
+
+   overriding function Buffer_Related_Type
+     (Self : in out Factory;
+      Name : League.Strings.Universal_String)
+        return not null WebIDL.Types.Type_Access
+   is
+      Ok     : Boolean;
+      Cursor : Type_Maps.Cursor := Self.Buffers.Find (Name);
+      Result : Types.Buffer_Type_Access;
+   begin
+      if not Type_Maps.Has_Element (Cursor) then
+         Result := new Types.Buffer_Type'(Name => Name);
+         Self.Buffers.Insert
+           (Name,
+            WebIDL.Types.Type_Access (Result),
+            Cursor,
+            Ok);
+      end if;
+
+      return Type_Maps.Element (Cursor);
+   end Buffer_Related_Type;
+
    ----------
    -- Byte --
    ----------

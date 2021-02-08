@@ -305,6 +305,21 @@ package body WebIDL.Parsers is
                Expect (Symbol_Token, Ok);
                Result := Factory.Symbol;
 
+            when ArrayBuffer_Token |
+                 DataView_Token |
+                 Int8Array_Token |
+                 Int16Array_Token |
+                 Int32Array_Token |
+                 Uint8Array_Token |
+                 Uint16Array_Token |
+                 Uint32Array_Token |
+                 Uint8ClampedArray_Token |
+                 Float32Array_Token |
+                 Float64Array_Token =>
+
+               Result := Factory.Buffer_Related_Type (Next.Text);
+               Expect (Next.Kind, Ok);
+
             when others =>
                raise Program_Error;
          end case;

@@ -106,4 +106,13 @@ package WebIDL.Factories is
    not overriding function BigInt (Self : in out Factory)
      return not null WebIDL.Types.Type_Access is abstract;
 
+   not overriding function DOMString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is abstract;
+
+   not overriding function ByteString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is abstract;
+
+   not overriding function USVString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is abstract;
+
 end WebIDL.Factories;

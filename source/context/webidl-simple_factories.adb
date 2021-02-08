@@ -160,6 +160,16 @@ package body WebIDL.Simple_Factories is
       return Types.Byte'Access;
    end Byte;
 
+   ----------------
+   -- ByteString --
+   ----------------
+
+   overriding function ByteString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.ByteString'Access;
+   end ByteString;
+
    -----------------
    -- Constructor --
    -----------------
@@ -176,6 +186,16 @@ package body WebIDL.Simple_Factories is
 
       return WebIDL.Constructors.Constructor_Access (Result);
    end Constructor;
+
+   ---------------
+   -- DOMString --
+   ---------------
+
+   overriding function DOMString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.DOMString'Access;
+   end DOMString;
 
    -----------------
    -- Enumeration --
@@ -306,5 +326,15 @@ package body WebIDL.Simple_Factories is
    begin
       return Types.Undefined'Access;
    end Undefined;
+
+   ---------------
+   -- USVString --
+   ---------------
+
+   overriding function USVString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access is
+   begin
+      return Types.USVString'Access;
+   end USVString;
 
 end WebIDL.Simple_Factories;

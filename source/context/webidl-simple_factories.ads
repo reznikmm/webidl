@@ -89,6 +89,15 @@ package WebIDL.Simple_Factories is
       Double     : Boolean)
         return not null WebIDL.Types.Type_Access;
 
+   overriding function DOMString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function ByteString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
+   overriding function USVString (Self : in out Factory)
+     return not null WebIDL.Types.Type_Access;
+
 private
 
    package Nodes is
@@ -329,6 +338,27 @@ private
         return League.Strings.Universal_String is (+"BigInt");
 
       BigInt : aliased BigInt_Type;
+
+      type DOMString_Type is new Base with null record;
+
+      overriding function Name (Self : DOMString_Type)
+        return League.Strings.Universal_String is (+"DOMString");
+
+      DOMString : aliased DOMString_Type;
+
+      type ByteString_Type is new Base with null record;
+
+      overriding function Name (Self : ByteString_Type)
+        return League.Strings.Universal_String is (+"ByteString");
+
+      ByteString : aliased ByteString_Type;
+
+      type USVString_Type is new Base with null record;
+
+      overriding function Name (Self : USVString_Type)
+        return League.Strings.Universal_String is (+"USVString");
+
+      USVString : aliased USVString_Type;
 
    end Types;
 

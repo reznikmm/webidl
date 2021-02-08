@@ -275,6 +275,18 @@ package body WebIDL.Parsers is
                Expect (Bigint_Token, Ok);
                Result := Factory.BigInt;
 
+            when DOMString_Token =>
+               Expect (DOMString_Token, Ok);
+               Result := Factory.DOMString;
+
+            when ByteString_Token =>
+               Expect (ByteString_Token, Ok);
+               Result := Factory.ByteString;
+
+            when USVString_Token =>
+               Expect (USVString_Token, Ok);
+               Result := Factory.USVString;
+
             when others =>
                raise Program_Error;
          end case;

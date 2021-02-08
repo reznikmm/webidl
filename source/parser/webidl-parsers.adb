@@ -7,6 +7,8 @@ with League.Strings;
 
 with WebIDL.Definitions;
 with WebIDL.Enumerations;
+with WebIDL.Interface_Members;
+with WebIDL.Interfaces;
 
 package body WebIDL.Parsers is
 
@@ -34,6 +36,10 @@ package body WebIDL.Parsers is
          Ok   : in out Boolean)
         with Inline;
 
+      procedure CallbackOrInterfaceOrMixin
+        (Result : out WebIDL.Definitions.Definition_Access;
+         Ok     : in out Boolean);
+
       procedure Definition
         (Result : out WebIDL.Definitions.Definition_Access;
          Ok     : in out Boolean);
@@ -44,6 +50,41 @@ package body WebIDL.Parsers is
       procedure EnumValueList
         (Result : out League.String_Vectors.Universal_String_Vector;
          Ok     : in out Boolean);
+      procedure Inheritance
+        (Result : out League.Strings.Universal_String;
+         Ok     : in out Boolean);
+      procedure InterfaceMembers
+        (Result : out WebIDL.Factories.Interface_Member_Vector_Access;
+         Ok     : in out Boolean);
+      procedure InterfaceMember
+        (Result : out WebIDL.Interface_Members.Interface_Member_Access;
+         Ok     : in out Boolean);
+      procedure InterfaceOrMixin
+        (Result : out WebIDL.Definitions.Definition_Access;
+         Ok     : in out Boolean);
+      procedure InterfaceRest
+        (Result : out WebIDL.Interfaces.Interface_Access;
+         Ok     : in out Boolean);
+
+      --------------------------------
+      -- CallbackOrInterfaceOrMixin --
+      --------------------------------
+
+      procedure CallbackOrInterfaceOrMixin
+        (Result : out WebIDL.Definitions.Definition_Access;
+         Ok     : in out Boolean) is
+      begin
+         case Next.Kind is
+            when Callback_Token =>
+               --  Expect (Callback_Token, Ok);
+               raise Program_Error;
+            when Interface_Token =>
+               Expect (Interface_Token, Ok);
+               InterfaceOrMixin (Result, Ok);
+            when others =>
+               Ok := False;
+         end case;
+      end CallbackOrInterfaceOrMixin;
 
       ----------------
       -- Definition --
@@ -54,6 +95,8 @@ package body WebIDL.Parsers is
          Ok     : in out Boolean) is
       begin
          case Next.Kind is
+            when Callback_Token | Interface_Token =>
+               CallbackOrInterfaceOrMixin (Result, Ok);
             when Enum_Token =>
                declare
                   Node : WebIDL.Enumerations.Enumeration_Access;
@@ -128,6 +171,108 @@ package body WebIDL.Parsers is
             Ok := False;
          end if;
       end Expect;
+
+      procedure Inheritance
+        (Result : out League.Strings.Universal_String;
+         Ok     : in out Boolean) is
+      begin
+         if Next.Kind = ':' then
+            Expect (':', Ok);
+            Expect (Identifier_Token, Ok);
+            Result := Next.Text;
+         end if;
+      end Inheritance;
+
+      ---------------------
+      -- InterfaceMember --
+      ---------------------
+
+      procedure InterfaceMember
+        (Result : out WebIDL.Interface_Members.Interface_Member_Access;
+         Ok     : in out Boolean) is
+         pragma Unreferenced (Result);
+      begin
+         Ok := False;
+         null;
+      end InterfaceMember;
+
+      ----------------------
+      -- InterfaceMembers --
+      ----------------------
+
+      procedure InterfaceMembers
+        (Result : out WebIDL.Factories.Interface_Member_Vector_Access;
+         Ok     : in out Boolean)
+      is
+      begin
+         Result := Factory.Interface_Members;
+
+         while Ok loop
+            declare
+               Item : WebIDL.Interface_Members.Interface_Member_Access;
+            begin
+               InterfaceMember (Item, Ok);
+
+               if Ok then
+                  Result.Append (Item);
+               end if;
+            end;
+         end loop;
+
+         Ok := True;
+      end InterfaceMembers;
+
+      ----------------------
+      -- InterfaceOrMixin --
+      ----------------------
+
+      procedure InterfaceOrMixin
+        (Result : out WebIDL.Definitions.Definition_Access;
+         Ok     : in out Boolean) is
+      begin
+         if Next.Kind = Mixin_Token then
+            raise Program_Error;
+         else
+            declare
+               Value : WebIDL.Interfaces.Interface_Access;
+            begin
+               InterfaceRest (Value, Ok);
+               Result := WebIDL.Definitions.Definition_Access (Value);
+            end;
+         end if;
+      end InterfaceOrMixin;
+
+      -------------------
+      -- InterfaceRest --
+      -------------------
+
+      procedure InterfaceRest
+        (Result : out WebIDL.Interfaces.Interface_Access;
+         Ok     : in out Boolean)
+      is
+         Name : League.Strings.Universal_String;
+         Parent : League.Strings.Universal_String;
+         Members : WebIDL.Factories.Interface_Member_Vector_Access;
+      begin
+         if not Ok then
+            return;
+         end if;
+
+         Expect (Identifier_Token, Ok);
+         Name := Next.Text;
+         Inheritance (Parent, Ok);
+         Expect ('{', Ok);
+         InterfaceMembers (Members, Ok);
+         Expect ('}', Ok);
+         Expect (';', Ok);
+
+         if Ok then
+            Result := Factory.New_Interface
+              (Name    => Name,
+               Parent  => Parent,
+               Members => Members);
+         end if;
+      end InterfaceRest;
 
    begin
       Lexer.Next_Token (Next);

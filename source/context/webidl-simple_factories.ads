@@ -4,9 +4,11 @@
 -------------------------------------------------------------
 
 with Ada.Containers.Vectors;
+with Ada.Containers.Hashed_Maps;
 
 with League.String_Vectors;
 with League.Strings;
+with League.Strings.Hash;
 
 with WebIDL.Arguments;
 with WebIDL.Constructors;
@@ -19,7 +21,20 @@ with WebIDL.Types;
 package WebIDL.Simple_Factories is
    pragma Preelaborate;
 
-   type Factory is limited new WebIDL.Factories.Factory with null record;
+   type Factory is limited new WebIDL.Factories.Factory with private;
+
+private
+
+   package Type_Maps is new Ada.Containers.Hashed_Maps
+     (Key_Type        => League.Strings.Universal_String,
+      Element_Type    => WebIDL.Types.Type_Access,
+      Hash            => League.Strings.Hash,
+      Equivalent_Keys => League.Strings."=",
+      "="             => WebIDL.Types."=");
+
+   type Factory is limited new WebIDL.Factories.Factory with record
+      Sequences : Type_Maps.Map;
+   end record;
 
    overriding function Enumeration
      (Self   : in out Factory;
@@ -98,7 +113,10 @@ package WebIDL.Simple_Factories is
    overriding function USVString (Self : in out Factory)
      return not null WebIDL.Types.Type_Access;
 
-private
+   overriding function Sequence
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access;
 
    package Nodes is
       type Enumeration is new WebIDL.Enumerations.Enumeration with record
@@ -214,6 +232,8 @@ private
    end Nodes;
 
    package Types is
+      use type League.Strings.Universal_String;
+
       function "+" (Text : Wide_Wide_String)
         return League.Strings.Universal_String
           renames League.Strings.To_Universal_String;
@@ -359,6 +379,16 @@ private
         return League.Strings.Universal_String is (+"USVString");
 
       USVString : aliased USVString_Type;
+
+      type Sequence is new Base with record
+         Element : WebIDL.Types.Type_Access;
+      end record;
+
+      type Sequence_Access is access all Sequence;
+
+      overriding function Name (Self : Sequence)
+        return League.Strings.Universal_String is
+          (Self.Element.Name & "Sequence");
 
    end Types;
 

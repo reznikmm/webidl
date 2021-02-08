@@ -307,6 +307,32 @@ package body WebIDL.Simple_Factories is
       return Types.Octet'Access;
    end Octet;
 
+   --------------
+   -- Sequence --
+   --------------
+
+   overriding function Sequence
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access
+   is
+      Ok     : Boolean;
+      Name   : constant League.Strings.Universal_String := T.Name;
+      Cursor : Type_Maps.Cursor := Self.Sequences.Find (Name);
+      Result : Types.Sequence_Access;
+   begin
+      if not Type_Maps.Has_Element (Cursor) then
+         Result := new Types.Sequence'(Element => T);
+         Self.Sequences.Insert
+           (Name,
+            WebIDL.Types.Type_Access (Result),
+            Cursor,
+            Ok);
+      end if;
+
+      return Type_Maps.Element (Cursor);
+   end Sequence;
+
    ------------
    -- Symbol --
    ------------

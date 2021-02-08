@@ -115,4 +115,9 @@ package WebIDL.Factories is
    not overriding function USVString (Self : in out Factory)
      return not null WebIDL.Types.Type_Access is abstract;
 
+   not overriding function Sequence
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+     return not null WebIDL.Types.Type_Access is abstract;
+
 end WebIDL.Factories;

@@ -28,4 +28,11 @@ package WebIDL.Types is
 
    type Named_Type is limited interface and Type_Definition;
 
+   type Sequence_Type is limited interface and Type_Definition;
+   --  The sequence<T> type is a parameterized type whose values are (possibly
+   --  zero-length) lists of values of type T.
+
+   not overriding function Element_Type (Self : Sequence_Type)
+     return not null Type_Access is abstract;
+
 end WebIDL.Types;

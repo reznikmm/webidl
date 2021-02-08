@@ -245,10 +245,6 @@ package body WebIDL.Parsers is
          Ok     : in out Boolean) is
       begin
          case Next.Kind is
-            when Object_Token =>
-               Expect (Object_Token, Ok);
-               Result := Factory.Object;
-
             when Short_Token | Long_Token | Unsigned_Token =>
                UnsignedIntegerType (Result, Ok);
 
@@ -286,6 +282,24 @@ package body WebIDL.Parsers is
             when USVString_Token =>
                Expect (USVString_Token, Ok);
                Result := Factory.USVString;
+
+            when Sequence_Token =>
+               declare
+                  T : WebIDL.Types.Type_Access;
+               begin
+                  Expect (Sequence_Token, Ok);
+                  Expect ('<', Ok);
+                  ParseType (T, Ok);
+                  Expect ('>', Ok);
+
+                  if Ok then
+                     Result := Factory.Sequence (T);
+                  end if;
+               end;
+
+            when Object_Token =>
+               Expect (Object_Token, Ok);
+               Result := Factory.Object;
 
             when others =>
                raise Program_Error;

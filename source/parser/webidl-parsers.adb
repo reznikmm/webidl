@@ -320,6 +320,34 @@ package body WebIDL.Parsers is
                Result := Factory.Buffer_Related_Type (Next.Text);
                Expect (Next.Kind, Ok);
 
+            when FrozenArray_Token =>
+               declare
+                  T : WebIDL.Types.Type_Access;
+               begin
+                  Expect (FrozenArray_Token, Ok);
+                  Expect ('<', Ok);
+                  ParseType (T, Ok);
+                  Expect ('>', Ok);
+
+                  if Ok then
+                     Result := Factory.Frozen_Array (T);
+                  end if;
+               end;
+
+            when ObservableArray_Token =>
+               declare
+                  T : WebIDL.Types.Type_Access;
+               begin
+                  Expect (ObservableArray_Token, Ok);
+                  Expect ('<', Ok);
+                  ParseType (T, Ok);
+                  Expect ('>', Ok);
+
+                  if Ok then
+                     Result := Factory.Observable_Array (T);
+                  end if;
+               end;
+
             when others =>
                raise Program_Error;
          end case;

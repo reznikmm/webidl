@@ -130,6 +130,15 @@ package WebIDL.Factories is
    --  to objects that hold a fixed length array of unmodifiable values. The
    --  values in the array are of type T.
 
+   not overriding function Observable_Array
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+     return not null WebIDL.Types.Type_Access is abstract;
+   --  An observable array type is a parameterized type whose values are
+   --  references to a combination of a mutable list of objects of type T, as
+   --  well as behavior to perform when author code modifies the contents of
+   --  the list.
+
    not overriding function Buffer_Related_Type
      (Self : in out Factory;
       Name : League.Strings.Universal_String)

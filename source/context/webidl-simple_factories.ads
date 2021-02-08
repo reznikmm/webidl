@@ -33,9 +33,10 @@ private
       "="             => WebIDL.Types."=");
 
    type Factory is limited new WebIDL.Factories.Factory with record
-      Sequences : Type_Maps.Map;
-      Buffers   : Type_Maps.Map;
-      Arrays    : Type_Maps.Map;
+      Sequences   : Type_Maps.Map;
+      Buffers     : Type_Maps.Map;
+      Arrays      : Type_Maps.Map;
+      Observables : Type_Maps.Map;
    end record;
 
    overriding function Enumeration
@@ -126,6 +127,11 @@ private
         return not null WebIDL.Types.Type_Access;
 
    overriding function Frozen_Array
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access;
+
+   overriding function Observable_Array
      (Self : in out Factory;
       T    : not null WebIDL.Types.Type_Access)
         return not null WebIDL.Types.Type_Access;
@@ -411,6 +417,16 @@ private
       overriding function Name (Self : Frozen_Array)
         return League.Strings.Universal_String is
           (Self.Element.Name & "Array");
+
+      type Observable_Array is new Base with record
+         Element : WebIDL.Types.Type_Access;
+      end record;
+
+      type Observable_Array_Access is access all Observable_Array;
+
+      overriding function Name (Self : Observable_Array)
+        return League.Strings.Universal_String is
+          (Self.Element.Name & "ObservableArray");
 
       type Buffer_Type is new Base with record
          Name : League.Strings.Universal_String;

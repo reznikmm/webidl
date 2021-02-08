@@ -348,6 +348,32 @@ package body WebIDL.Simple_Factories is
       return Types.Object'Access;
    end Object;
 
+   ----------------------
+   -- Observable_Array --
+   ----------------------
+
+   overriding function Observable_Array
+     (Self : in out Factory;
+      T    : not null WebIDL.Types.Type_Access)
+        return not null WebIDL.Types.Type_Access
+   is
+      Ok     : Boolean;
+      Name   : constant League.Strings.Universal_String := T.Name;
+      Cursor : Type_Maps.Cursor := Self.Observables.Find (Name);
+      Result : Types.Observable_Array_Access;
+   begin
+      if not Type_Maps.Has_Element (Cursor) then
+         Result := new Types.Observable_Array'(Element => T);
+         Self.Observables.Insert
+           (Name,
+            WebIDL.Types.Type_Access (Result),
+            Cursor,
+            Ok);
+      end if;
+
+      return Type_Maps.Element (Cursor);
+   end Observable_Array;
+
    -----------
    -- Octet --
    -----------
